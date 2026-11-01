@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trezan Bypass - Automated Shortlink & SFL Resolver Engine</title>
+    <!-- Favicon Resmi Trezan -->
+    <link rel="icon" type="image/jpeg" href="https://files.catbox.moe/e5qxsl.jpg">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Outfit & Fira Code -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            cyan: '#00f0ff',
+                            blue: '#0072ff',
+                            dark: '#080c14',
+                            card: '#0d1626',
+                            border: 'rgba(0, 240, 255, 0.25)',
+                            glow: 'rgba(0, 240, 255, 0.4)'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #080c14;
+            color: #e2e8f0;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(0, 114, 255, 0.18) 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(0, 240, 255, 0.15) 0%, transparent 45%),
+                linear-gradient(to bottom, rgba(8, 12, 20, 0.85), rgba(8, 12, 20, 0.98));
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        /* Glassmorphism Styling */
+        .glass-panel {
+            background: rgba(13, 22, 38, 0.7);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(0, 240, 255, 0.18);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+        }
+
+        .glass-panel-glow {
+            background: rgba(13, 22, 38, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 240, 255, 0.35);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.2), inset 0 0 15px rgba(0, 240, 255, 0.05);
+        }
+
+        .cyber-btn {
+            background: linear-gradient(135deg, #0072ff 0%, #00f0ff 100%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cyber-btn:hover {
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.7);
+            transform: translateY(-2px);
+        }
+
+        .cyber-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(60deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: rotate(30deg);
+            transition: 0.5s;
+        }
+
+        .cyber-btn:hover::after {
+            left: 100%;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #080c14;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 240, 255, 0.25);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f0ff;
+        }
+
+        /* Cyber Grid Background Pattern */
+        .bg-cyber-grid {
+            background-size: 32px 32px;
+            background-image: 
+                linear-gradient(to right, rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+        }
+
+        /* Scanning Animation Bar */
+        .radar-sweep {
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, transparent, #00f0ff, transparent);
+            animation: radar 2s ease-in-out infinite;
+        }
+
+        @keyframes radar {
+            0% { transform: translateY(0); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(180px); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="font-sans antialiased bg-cyber-grid text-slate-200 min-h-screen flex flex-col justify-between selection:bg-cyber-cyan selection:text-black">
+
+    <!-- TOP HEADER / BRANDING NAVBAR -->
+    <header class="sticky top-0 z-40 glass-panel border-b border-cyber-border/40 px-4 lg:px-8 py-3.5">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <!-- Brand Logo & Title -->
+            <div class="flex items-center gap-3">
+                <div class="relative group">
+                    <div class="absolute -inset-0.5 bg-gradient-to-r from-cyber-blue to-cyber-cyan rounded-full blur opacity-75 group-hover:opacity-100 transition duration-300"></div>
+                    <img src="https://files.catbox.moe/e5qxsl.jpg" 
+                         alt="Trezan Bypass Logo" 
+                         onerror="this.onerror=null; this.src='https://placehold.co/100x100/080c14/00f0ff?text=TREZAN'"
+                         class="relative w-11 h-11 rounded-full object-cover border border-cyber-cyan/50 shadow-lg">
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="font-extrabold text-lg md:text-2xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-200 to-cyber-cyan">
+                            TREZAN BYPASS
+                        </h1>
+                        <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-cyber-cyan/15 text-cyber-cyan border border-cyber-cyan/30">
+                            v3.0 ONLINE
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-400 hidden sm:block">Automated Shortlink & SFL.GL Bypass Engine</p>
+                </div>
+            </div>
+
+            <!-- Header Quick Actions -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- History Drawer Button -->
+                <button onclick="toggleHistoryDrawer()" class="px-3 py-1.5 rounded-lg text-xs font-semibold glass-panel hover:border-cyber-cyan/60 text-slate-200 flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-clock-rotate-left text-cyber-cyan"></i>
+                    <span class="hidden sm:inline">Riwayat</span>
+                </button>
+
+                <!-- Audio Toggle Button -->
+                <button id="soundToggleBtn" onclick="toggleAudio()" class="p-2 rounded-lg text-xs glass-panel hover:border-cyber-cyan/60 text-cyber-cyan transition" title="Efek Suara Cyber">
+                    <i class="fa-solid fa-volume-high text-sm"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 lg:p-8 space-y-6">
+
+        <!-- MAIN INPUT CARD & BACKEND CONFIG -->
+        <section class="glass-panel-glow rounded-2xl p-5 md:p-6 relative overflow-hidden">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-2.5 h-2.5 rounded-full bg-cyber-cyan animate-pulse"></div>
+                    <h2 class="text-base md:text-lg font-bold tracking-wide text-white flex items-center gap-2">
+                        <i class="fa-solid fa-link text-cyber-cyan"></i>
+                        INPUT SHORTLINK TARGET (SFL.GL / KHADDAVI)
+                    </h2>
+                </div>
+                <div class="flex items-center gap-2 text-xs">
+                    <button onclick="pasteFromClipboard()" class="px-2.5 py-1 rounded-md bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 transition flex items-center gap-1">
+                        <i class="fa-regular fa-paste"></i> Tempel Link
+                    </button>
+                    <button onclick="clearInput()" class="px-2.5 py-1 rounded-md bg-slate-900 hover:bg-rose-950/40 text-slate-300 hover:text-rose-300 border border-slate-700 transition flex items-center gap-1">
+                        <i class="fa-solid fa-trash-can"></i> Bersihkan
+                    </button>
+                </div>
+            </div>
+
+            <!-- BACKEND API ENDPOINT CONFIGURATION -->
+            <div class="mb-4 bg-slate-950/80 border border-cyber-border/40 rounded-xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                <div class="flex items-center gap-2 text-xs text-slate-300 font-mono">
+                    <i class="fa-solid fa-server text-cyber-cyan"></i>
+                    <span>Backend API Endpoint:</span>
+                </div>
+                <input type="text" id="apiEndpointInput" 
+                       value="https://trezan-bypass-api.onrender.com/api/bypass" 
+                       placeholder="https://server-bypass-anda.onrender.com/api/bypass"
+                       class="w-full sm:w-2/3 bg-slate-900 border border-slate-700 focus:border-cyber-cyan text-xs font-mono text-cyan-300 px-3 py-1.5 rounded-lg outline-none transition">
+            </div>
+
+            <!-- Target Link Input -->
+            <div class="relative group">
+                <input type="url" id="targetUrlInput" 
+                       placeholder="Masukkan shortlink di sini (Contoh: https://sfl.gl/7H6i5pU)..." 
+                       class="w-full bg-slate-950/90 text-slate-100 font-mono text-sm md:text-base px-4 py-4 rounded-xl border border-cyber-border focus:border-cyber-cyan focus:ring-1 focus:ring-cyber-cyan outline-none transition shadow-inner">
+            </div>
+
+            <!-- PRESET SHORTLINKS TEST SAMPLES -->
+            <div class="mt-4 flex flex-wrap items-center gap-2 text-xs">
+                <span class="text-slate-400 font-mono mr-1">Uji Coba Sampel:</span>
+                <button onclick="loadSample('https://sfl.gl/7H6i5pU')" class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 hover:border-cyber-cyan/50 text-cyan-300 font-mono transition">sfl.gl Sample</button>
+                <button onclick="loadSample('https://app.khaddavi.net/go/demo')" class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 hover:border-cyber-cyan/50 text-cyan-300 font-mono transition">khaddavi Sample</button>
+            </div>
+
+            <!-- MAIN EXECUTE BYPASS BUTTON -->
+            <div class="mt-6 flex justify-end">
+                <button onclick="executeBypassProcess()" id="bypassBtn" class="cyber-btn w-full sm:w-auto px-10 py-4 rounded-xl font-extrabold text-sm text-slate-950 uppercase tracking-wider flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-bolt text-lg"></i>
+                    <span>BYPASS SEKARANG</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- LOADING INDICATOR STATE (HIDDEN INITIALLY) -->
+        <section id="loadingState" class="hidden glass-panel rounded-2xl p-8 text-center relative overflow-hidden">
+            <div class="radar-sweep"></div>
+            <div class="flex flex-col items-center justify-center gap-4">
+                <div class="relative w-16 h-16 flex items-center justify-center">
+                    <div class="absolute inset-0 rounded-full border-4 border-cyber-cyan/20 border-t-cyber-cyan animate-spin"></div>
+                    <img src="https://files.catbox.moe/e5qxsl.jpg" alt="Logo" class="w-8 h-8 rounded-full object-cover">
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-cyber-cyan font-mono tracking-wider animate-pulse">MENEKSEKUSI BYPASS DENGAN PUPPETEER BACKEND...</h3>
+                    <p class="text-xs text-slate-400 mt-1" id="loadingStatusText">Menghubungi server API Render & melepaskan pengalihan iklan...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- RESULT SECTION CONTAINER (HIDDEN INITIALLY) -->
+        <section id="resultSection" class="hidden space-y-6">
+            
+            <!-- DESTINATION RESULT CARD -->
+            <div class="glass-panel-glow rounded-2xl p-6 border border-cyber-cyan/50 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-mono font-bold uppercase tracking-wider text-cyber-cyan flex items-center gap-2">
+                        <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                        TAUTAN ASLI HASIL BYPASS (DESTINATION URL)
+                    </h3>
+                    <span class="text-[11px] font-mono text-emerald-400 bg-emerald-950/60 px-2.5 py-1 rounded-md border border-emerald-500/40">
+                        SUCCESS 200 OK
+                    </span>
+                </div>
+
+                <!-- Highlighted Destination Output Box -->
+                <div class="bg-slate-950 rounded-xl p-4 border border-emerald-500/40 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-inner">
+                    <p id="destinationUrlText" class="font-mono text-emerald-300 text-sm md:text-base break-all select-all font-semibold w-full">
+                        -
+                    </p>
+                </div>
+
+                <!-- Action Control Buttons -->
+                <div class="flex flex-wrap items-center gap-3 pt-2">
+                    <button onclick="copyDestinationUrl()" class="px-5 py-2.5 rounded-xl font-bold text-xs bg-cyber-blue/30 text-cyber-cyan hover:bg-cyber-blue/50 border border-cyber-cyan/40 transition flex items-center gap-2">
+                        <i class="fa-regular fa-copy"></i>
+                        <span>Salin Link Asli</span>
+                    </button>
+                    <a id="openDirectLinkBtn" href="#" target="_blank" class="px-5 py-2.5 rounded-xl font-bold text-xs bg-emerald-500 text-slate-950 hover:bg-emerald-400 transition flex items-center gap-2 shadow-lg shadow-emerald-500/20">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        <span>Buka Link Langsung</span>
+                    </a>
+                    <button onclick="shareLink()" class="px-4 py-2.5 rounded-xl font-semibold text-xs bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-2">
+                        <i class="fa-solid fa-share-nodes"></i>
+                        <span>Bagikan</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- LIVE WEB PREVIEW IFRAME -->
+            <div class="glass-panel rounded-2xl overflow-hidden border border-cyber-border">
+                <div class="flex flex-wrap items-center justify-between bg-slate-950/90 border-b border-cyber-border/40 px-5 py-3 gap-3">
+                    <div class="flex items-center gap-2 text-xs font-bold text-cyber-cyan">
+                        <i class="fa-solid fa-display"></i>
+                        <span>PRATINJAU WEBPAGE TUJUAN (LIVE PREVIEW)</span>
+                    </div>
+
+                    <!-- Screen Resizer Toolbar -->
+                    <div class="flex items-center gap-2 text-xs">
+                        <span class="text-slate-400 font-mono hidden sm:inline">Layar:</span>
+                        <button onclick="setIframeWidth('100%')" class="px-2.5 py-1 rounded bg-slate-900 hover:bg-cyber-cyan/20 text-slate-300 font-mono">Desktop</button>
+                        <button onclick="setIframeWidth('768px')" class="px-2.5 py-1 rounded bg-slate-900 hover:bg-cyber-cyan/20 text-slate-300 font-mono">Tablet</button>
+                        <button onclick="setIframeWidth('375px')" class="px-2.5 py-1 rounded bg-slate-900 hover:bg-cyber-cyan/20 text-slate-300 font-mono">Mobile</button>
+                    </div>
+                </div>
+
+                <!-- Sandboxed Frame Container -->
+                <div class="w-full flex justify-center bg-slate-950 p-2 overflow-hidden min-h-[420px]">
+                    <iframe id="livePreviewFrame" 
+                            class="w-full h-[450px] bg-white rounded-lg transition-all duration-300" 
+                            sandbox="allow-scripts allow-modals allow-forms allow-same-origin"
+                            title="Website Preview"></iframe>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- HISTORY DRAWER (SLIDE OVER) -->
+    <div id="historyDrawer" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden justify-end transition-opacity">
+        <div class="w-full max-w-md bg-slate-900 border-l border-cyber-border h-full p-6 flex flex-col shadow-2xl">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+                <h3 class="font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-cyber-cyan"></i>
+                    Riwayat Link Ter-Bypass
+                </h3>
+                <button onclick="toggleHistoryDrawer()" class="text-slate-400 hover:text-white text-lg p-1">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- History List -->
+            <div id="historyList" class="flex-1 overflow-y-auto my-4 space-y-3 pr-1">
+                <!-- Dynamically Populated -->
+            </div>
+
+            <button onclick="clearHistoryList()" class="w-full py-2.5 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 text-xs font-semibold border border-rose-800/40 transition">
+                Bersihkan Riwayat
+            </button>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- FOOTER -->
+    <footer class="glass-panel border-t border-cyber-border/30 mt-auto py-4 px-6 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+                <img src="https://files.catbox.moe/e5qxsl.jpg" alt="Trezan Logo" class="w-5 h-5 rounded-full object-cover">
+                <span class="font-bold text-slate-300">Trezan Bypass System</span>
+            </div>
+            <p>© 2026 Trezan Systems. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC ENGINE -->
+    <script>
+        // GLOBAL STATE
+        let audioEnabled = true;
+        let audioCtx = null;
+        let lastBypassedUrl = "";
+
+        // WEB AUDIO SYNTHESIZER FOR SOUND EFFECTS
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playCyberSound(type) {
+            if (!audioEnabled) return;
+            try {
+                initAudio();
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'start') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.exponentialRampToValueAtTime(900, now + 0.15);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                } else if (type === 'success') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.2);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'copy') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(900, now);
+                    osc.frequency.setValueAtTime(1400, now + 0.05);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                    osc.start(now);
+                    osc.stop(now + 0.1);
+                }
+            } catch (e) {}
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            const btn = document.getElementById('soundToggleBtn');
+            if (audioEnabled) {
+                btn.classList.remove('text-slate-500');
+                btn.classList.add('text-cyber-cyan');
+                btn.innerHTML = '<i class="fa-solid fa-volume-high text-sm"></i>';
+                showToast('Efek Suara: AKTIF', 'info');
+                playCyberSound('copy');
+            } else {
+                btn.classList.remove('text-cyber-cyan');
+                btn.classList.add('text-slate-500');
+                btn.innerHTML = '<i class="fa-solid fa-volume-xmark text-sm"></i>';
+                showToast('Efek Suara: NONAKTIF', 'info');
+            }
+        }
+
+        // EXECUTE BYPASS VIA BACKEND API
+        async function executeBypassProcess() {
+            const targetUrl = document.getElementById('targetUrlInput').value.trim();
+            const apiEndpoint = document.getElementById('apiEndpointInput').value.trim();
+
+            if (!targetUrl) {
+                showToast('Harap masukkan link target terlebih dahulu!', 'error');
+                return;
+            }
+
+            if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
+                showToast('Format link tidak valid! Sertakan http:// atau https://', 'error');
+                return;
+            }
+
+            playCyberSound('start');
+
+            // Show Loading State
+            document.getElementById('resultSection').classList.add('hidden');
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('bypassBtn').disabled = true;
+
+            try {
+                // Call Backend API
+                const requestUrl = `${apiEndpoint}?url=${encodeURIComponent(targetUrl)}`;
+                const response = await fetch(requestUrl);
+                const data = await response.json();
+
+                if (data.success && data.destinationUrl) {
+                    lastBypassedUrl = data.destinationUrl;
+                    renderResultUI(data.destinationUrl);
+                    saveToHistory(targetUrl, data.destinationUrl);
+                    playCyberSound('success');
+                    showToast('Link berhasil di-bypass!', 'success');
+                } else {
+                    showToast('Gagal bypass: ' + (data.error || 'Respon backend tidak valid'), 'error');
+                }
+            } catch (err) {
+                showToast('Koneksi backend gagal. Pastikan server API Render Anda aktif.', 'error');
+            } finally {
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('bypassBtn').disabled = false;
+            }
+        }
+
+        // RENDER RESULT TO DOM
+        function renderResultUI(destinationUrl) {
+            document.getElementById('destinationUrlText').innerText = destinationUrl;
+            document.getElementById('openDirectLinkBtn').href = destinationUrl;
+
+            // Update Iframe Preview
+            const iframe = document.getElementById('livePreviewFrame');
+            iframe.src = destinationUrl;
+
+            // Show Result Card
+            document.getElementById('resultSection').classList.remove('hidden');
+            document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function setIframeWidth(width) {
+            document.getElementById('livePreviewFrame').style.width = width;
+        }
+
+        // UTILITY FUNCTIONS
+        function copyDestinationUrl() {
+            if (!lastBypassedUrl) return;
+            navigator.clipboard.writeText(lastBypassedUrl).then(() => {
+                playCyberSound('copy');
+                showToast('Link asli berhasil disalin!', 'success');
+            }).catch(() => {
+                const ta = document.createElement('textarea');
+                ta.value = lastBypassedUrl;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                playCyberSound('copy');
+                showToast('Link berhasil disalin!', 'success');
+            });
+        }
+
+        function shareLink() {
+            if (navigator.share && lastBypassedUrl) {
+                navigator.share({
+                    title: 'Hasil Bypass Trezan',
+                    url: lastBypassedUrl
+                }).catch(() => {});
+            } else {
+                copyDestinationUrl();
+            }
+        }
+
+        function clearInput() {
+            document.getElementById('targetUrlInput').value = '';
+        }
+
+        async function pasteFromClipboard() {
+            try {
+                const text = await navigator.clipboard.readText();
+                if (text) {
+                    document.getElementById('targetUrlInput').value = text;
+                    showToast('Link ditempel dari clipboard!', 'info');
+                }
+            } catch (err) {
+                showToast('Gagal membaca clipboard', 'error');
+            }
+        }
+
+        function loadSample(url) {
+            document.getElementById('targetUrlInput').value = url;
+            showToast('Sampel tautan dimuat!', 'info');
+        }
+
+        // LOCALSTORAGE HISTORY
+        function saveToHistory(target, destination) {
+            try {
+                let history = JSON.parse(localStorage.getItem('trezan_bypass_history') || '[]');
+                history.unshift({
+                    timestamp: new Date().toLocaleTimeString(),
+                    targetUrl: target,
+                    destinationUrl: destination
+                });
+                if (history.length > 15) history.pop();
+                localStorage.setItem('trezan_bypass_history', JSON.stringify(history));
+                renderHistoryList();
+            } catch (e) {}
+        }
+
+        function renderHistoryList() {
+            const list = document.getElementById('historyList');
+            try {
+                let history = JSON.parse(localStorage.getItem('trezan_bypass_history') || '[]');
+                if (history.length === 0) {
+                    list.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">Belum ada riwayat bypass.</p>';
+                    return;
+                }
+
+                list.innerHTML = history.map((item, idx) => `
+                    <div onclick="loadHistoryItem(${idx})" class="p-3 rounded-xl bg-slate-950 border border-slate-800 hover:border-cyber-cyan/50 cursor-pointer transition">
+                        <div class="flex items-center justify-between text-[11px] text-slate-400 font-mono mb-1">
+                            <span>${item.timestamp}</span>
+                            <span class="text-emerald-400 font-semibold">BYPASSED</span>
+                        </div>
+                        <p class="text-xs text-slate-300 font-mono truncate">${item.targetUrl}</p>
+                        <p class="text-[11px] text-cyber-cyan font-mono truncate mt-0.5">→ ${item.destinationUrl}</p>
+                    </div>
+                `).join('');
+            } catch (e) {}
+        }
+
+        function loadHistoryItem(idx) {
+            try {
+                let history = JSON.parse(localStorage.getItem('trezan_bypass_history') || '[]');
+                if (history[idx]) {
+                    document.getElementById('targetUrlInput').value = history[idx].targetUrl;
+                    toggleHistoryDrawer();
+                    executeBypassProcess();
+                }
+            } catch (e) {}
+        }
+
+        function clearHistoryList() {
+            localStorage.removeItem('trezan_bypass_history');
+            renderHistoryList();
+            showToast('Riwayat dibersihkan', 'info');
+        }
+
+        function toggleHistoryDrawer() {
+            const drawer = document.getElementById('historyDrawer');
+            drawer.classList.toggle('hidden');
+            drawer.classList.toggle('flex');
+            renderHistoryList();
+        }
+
+        // TOAST NOTIFICATIONS
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            const bgColor = type === 'success' ? 'bg-emerald-950 border-emerald-500 text-emerald-200' :
+                            type === 'error' ? 'bg-rose-950 border-rose-500 text-rose-200' :
+                            'bg-slate-900 border-cyber-cyan text-slate-100';
+
+            toast.className = `px-4 py-3 rounded-xl border ${bgColor} shadow-2xl text-xs font-semibold flex items-center gap-2 transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto`;
+            toast.innerHTML = `
+                <i class="fa-solid ${type === 'success' ? 'fa-circle-check text-emerald-400' : type === 'error' ? 'fa-triangle-exclamation text-rose-400' : 'fa-circle-info text-cyber-cyan'}"></i>
+                <span>${message}</span>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+  </html>
